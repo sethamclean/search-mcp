@@ -1,0 +1,77 @@
+[project]
+name = "search_mcp"
+version = "0.1.0"
+description = "An mcp server for search and fetching content as markdown."
+authors = [{ name = "Your Name", email = "your@email.com" }]
+requires-python = ">=3.12"
+dependencies = ["fastmcp", "markitdown[all]"]
+
+[project.scripts]
+search-mcp = "search_mcp.main:main"
+
+[tool.uv]
+# Recommended: Use uv for all Python environment and dependency management, including installing Hatch:
+#   uv pip install --user hatch
+# uv is compatible with this project and preferred for speed and reliability.
+
+[tool.ruff]
+line-length = 88
+target-version = "py38"
+fix = true
+
+[tool.ruff.lint]
+extend-select = ["C90", "ANN"]
+# Docstring requirements: D100 (public modules), D103 (public functions), D104 (public packages)
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+
+[tool.ty]
+src = { root = "src", respect-ignore-files = true }
+
+[tool.ty.environment]
+python-version = "3.12"
+
+[build-system]
+requires = ["hatchling", "editables"]
+build-backend = "hatchling.build"
+
+[tool.hatch]
+
+[tool.hatch.envs.default]
+path = ".venv"
+
+[project.optional-dependencies]
+dev = [
+  "ruff",
+  "ty",
+  "pip-audit",
+  "pytest",
+  "pytest-asyncio",
+  "pre-commit",
+  "editables",
+  "types-requests",
+  "fastapi",
+]
+# To install dev dependencies, use:
+#   uv pip install .[dev]
+
+[tool.hatch.envs.default.scripts]
+lint = "ruff check --fix ."
+typecheck = "ty check ./src"
+audit = "pip-audit"
+sbom = "pip-audit --format cyclonedx-json -o sbom.json"
+format = "ruff format ."
+build = "hatch build"
+test = "pytest"
+quality = [
+  "hatch run typecheck",
+  "hatch run lint",
+  "hatch run audit",
+  "hatch run format",
+  "hatch run build",
+  "hatch run test",
+]
+run-server = "python src/search_mcp/main.py"
